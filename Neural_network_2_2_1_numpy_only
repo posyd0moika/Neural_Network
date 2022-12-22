@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Avg:
@@ -98,3 +99,5 @@ data_zip = list(zip(data, inputs))  #zip learning and expected result
 
 test = NeuralNetworks()
 #test.neural_networks_learning(data_zip) #learning
+
+#plt.plot(test.arr)
