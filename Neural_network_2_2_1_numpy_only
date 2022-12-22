@@ -31,7 +31,12 @@ class NeuralNetworks:
                 [np.random.normal(), np.random.normal()]
             ]
         )
-        self.weights2 = np.array([[np.random.normal()], [np.random.normal()]])
+        self.weights2 = np.array(
+            [
+                [np.random.normal()],
+                [np.random.normal()]
+            ]
+        )
 
         self.bais1 = np.random.normal()
         self.bais2 = np.random.normal()
@@ -74,7 +79,6 @@ class NeuralNetworks:
                 ).T
                 dL_dbais12 = list(map(deriv_sigmoid, [sum_h1, sum_h2, sum_o]))
 
-                # обновление весов
                 self.weights1 -= learning_step * dL_do * dL_do_dh12 * dL_dh12_dw
                 self.bais1 -= learning_step * dL_do * dL_do_dh12[0] * dL_dbais12[0]
                 self.bais2 -= learning_step * dL_do * dL_do_dh12[1] * dL_dbais12[1]
