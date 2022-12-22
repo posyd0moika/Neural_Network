@@ -1,0 +1,96 @@
+import numpy as np
+
+
+class Avg:
+    def __init__(self):
+        self.summ = 0
+        self.count = 0
+
+    def avg(self):
+        return self.summ / self.count
+
+    def __call__(self, summ):
+        self.summ += summ
+        self.count += 1
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
+def deriv_sigmoid(x):
+    fx = sigmoid(x)
+    return fx * (1 - fx)
+
+
+class NeuralNetworks:
+    def __init__(self):
+        self.weights1 = np.array(
+            [
+                [np.random.normal(), np.random.normal()],
+                [np.random.normal(), np.random.normal()]
+            ]
+        )
+        self.weights2 = np.array([[np.random.normal()], [np.random.normal()]])
+
+        self.bais1 = np.random.normal()
+        self.bais2 = np.random.normal()
+        self.bais3 = np.random.normal()
+        self.arr = []
+
+    def feedforward(self, inputs, learning=False):
+        h12 = inputs.dot(self.weights1)
+        sum_h1 = float(h12[0] + self.bais1)
+        sum_h2 = float(h12[1] + self.bais2)
+        h12[0] = sigmoid(sum_h1)
+        h12[1] = sigmoid(sum_h2)
+        sum_res = (h12.dot(self.weights2) + self.bais3)[0]
+        result = sigmoid(sum_res)
+        return result if learning is False else (sum_res, sum_h1, sum_h2)
+
+    def neural_networks_learning(self, data_learning, numbers_iter=100000, learning_step=0.001):
+        avgg = Avg()
+        for num in range(numbers_iter):
+            print(num)
+            for data_training, expected_result in data_learning:
+                sum_o, sum_h1, sum_h2 = self.feedforward(data_training, learning=True)
+                res_o, res_h1, res_h2 = list(map(sigmoid, [sum_o, sum_h1, sum_h2]))
+
+                dL_do = -2 * (expected_result - res_o)  # производная от output
+
+                dL_do_dw56 = np.array(
+                    [
+                        [res_h1 * deriv_sigmoid(sum_o)],
+                        [res_h2 * deriv_sigmoid(sum_o)]
+                    ]
+                )
+                dL_do_dh12 = self.weights2 * deriv_sigmoid(sum_o)
+
+                dL_dh12_dw = np.array(
+                    [
+                        [data_training[0] * deriv_sigmoid(sum_h1), data_training[0] * deriv_sigmoid(sum_h2)],
+                        [data_training[1] * deriv_sigmoid(sum_h1), data_training[1] * deriv_sigmoid(sum_h2)]
+                    ]
+                ).T
+                dL_dbais12 = list(map(deriv_sigmoid, [sum_h1, sum_h2, sum_o]))
+
+                # обновление весов
+                self.weights1 -= learning_step * dL_do * dL_do_dh12 * dL_dh12_dw
+                self.bais1 -= learning_step * dL_do * dL_do_dh12[0] * dL_dbais12[0]
+                self.bais2 -= learning_step * dL_do * dL_do_dh12[1] * dL_dbais12[1]
+                self.bais3 -= learning_step * dL_do * dL_dbais12[2]
+                self.weights2 -= learning_step * dL_do * dL_do_dw56
+                avgg((expected_result - res_o) ** 2)
+
+            self.arr.append(avgg.avg())
+
+
+#data = np.array([[-2, -1],         #data learning
+#                 [25, 6],
+#                 [17, 4],
+#                 [-15, -6]])
+inputs = np.array([1, 0, 0, 1])     #expected result
+data_zip = list(zip(data, inputs))  #zip learning and expected result
+
+test = NeuralNetworks()
+#test.neural_networks_learning(data_zip) #learning
